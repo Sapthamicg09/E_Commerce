@@ -7,54 +7,61 @@ import './assets/styles.css';
 
 export default function CustomerHomePage() {
   const [products, setProducts] = useState([]);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0); // cart count state
   const [username, setUsername] = useState('');
-  const [cartError, setCartError] = useState(false); // State for cart fetch error
-  const [isCartLoading, setIsCartLoading] = useState(true); // State for cart loading
-
+  const [cartError, setCartError] = useState(false); // error state for cart
+  const [isCartLoading, setIsCartLoading] = useState(true); // loading state for cart
 
   useEffect(() => {
     fetchProducts();
-    if (username) {
-      fetchCartCount(); // Fetch cart count only if username is available
+    if (username && username !== 'Guest') {
+      fetchCartCount(); // Only fetch cart count if username is set
     }
-  }, [username]); // Re-run cart count fetch if username changes
+  }, [username]);
 
-  const fetchProducts = async (category = '') => {
+  const fetchProducts = async (category = 'Shirts') => {
     try {
-      const response = await fetch(
-        `http://localhost:9090/api/products${category ? `?category=${category}` : '?category=Shirts'}`, 
-        { credentials: 'include' } // Include authToken as a cookie
-      );
+      const response = await fetch(`http://localhost:9090/api/products?category=${category}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
       const data = await response.json();
-      if(data)
-     { 
-      setUsername(data.user?.name || 'Guest'); // Extract username
+      setUsername(data.user?.name || 'Guest'); // Set username or 'Guest' if undefined
       setProducts(data.products || []);
-    }else{
-      setProducts([]);
-
-    }
     } catch (error) {
       console.error('Error fetching products:', error);
-      setProducts([]);
+      setProducts([]); // Set products to empty array in case of error
     }
   };
 
   const fetchCartCount = async () => {
-    setIsCartLoading(true); // Set loading state
+    setIsCartLoading(true);
     try {
       const response = await fetch(`http://localhost:9090/api/cart/items/count?username=${username}`, {
-        credentials: 'include', // Include authToken as a cookie
+        credentials: 'include'
       });
+      if (!response.ok) {
+        throw new Error('Failed to fetch cart count');
+      }
       const count = await response.json();
-      setCartCount(count);
-      setCartError(false); // Reset error state if successful
+      console.log('Cart count received:', count); // Log the cart count for debugging
+
+      if (typeof count === 'number') {
+        setCartCount(count);
+        setCartError(false);
+      } else {
+        console.error('Unexpected cart count format:', count);
+        setCartCount(0);
+        setCartError(true);
+      }
     } catch (error) {
       console.error('Error fetching cart count:', error);
-      setCartError(true); // Set error state
+      setCartError(true);
+      setCartCount(0); // Fallback to zero in case of error
     } finally {
-      setIsCartLoading(false); // Remove loading state
+      setIsCartLoading(false);
     }
   };
 
@@ -63,7 +70,7 @@ export default function CustomerHomePage() {
   };
 
   const handleAddToCart = async (productId) => {
-    if (!username) {
+    if (!username || username === 'Guest') {
       console.error('Username is required to add items to the cart');
       return;
     }
@@ -71,16 +78,13 @@ export default function CustomerHomePage() {
       const response = await fetch('http://localhost:9090/api/cart/add', {
         credentials: 'include',
         method: 'POST',
-        body: JSON.stringify({ username, productId }), // Include username and productId in the request
-        headers: { 'Content-Type': 'application/json' },
-        // Include authToken as a cookie
+        body: JSON.stringify({ username, productId }),
+        headers: { 'Content-Type': 'application/json' }
       });
-
-      if (response.ok) {
-        fetchCartCount(); // Update cart count
-      } else {
-        console.error('Failed to add product to cart');
+      if (!response.ok) {
+        throw new Error('Failed to add product to cart');
       }
+      fetchCartCount(); // Update cart count after adding product
     } catch (error) {
       console.error('Error adding product to cart:', error);
     }
@@ -89,7 +93,7 @@ export default function CustomerHomePage() {
   return (
     <div className="customer-homepage">
       <Header
-        cartCount={isCartLoading ? '...' : cartError ? 'Error' : cartCount}
+        cartCount={isCartLoading ? 'Loading...' : cartError ? 'Error' : cartCount} // Handle loading/error states here
         username={username}
       />
       <nav className="navigation">
