@@ -27,7 +27,7 @@ public class AuthenticationFilter implements Filter {
 
     private final AuthService authService;
     private final UserRepository userRepository;
-
+    
     // Constructor to inject AuthService and UserRepository
     public AuthenticationFilter(AuthService authService, UserRepository userRepository) {
     	System.out.println("AuthenticationFilter initialized");
@@ -53,7 +53,7 @@ public class AuthenticationFilter implements Filter {
         }
      // Handle preflight (OPTIONS) requests
         if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
-            httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:5174");
+            httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
             httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             httpResponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
             httpResponse.setHeader("Access-Control-Allow-Credentials", "true");

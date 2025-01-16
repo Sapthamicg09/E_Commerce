@@ -29,7 +29,7 @@ public class ProductImage {
     // Getters and Setters
     
     public ProductImage() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public ProductImage(Integer imageId, Product product, String imageUrl) {
