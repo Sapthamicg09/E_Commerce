@@ -1,18 +1,36 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 import useravatar from './useravatar.png';
 import './assets/styles.css';
 
-
 export function ProfileDropdown({ username }) {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = () => {
-    console.log('User logged out');
-    // Add your logout functionality here
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:9090/api/auth/logout', {
+        method: 'POST', // Use POST as logout often involves session clearing
+        credentials: 'include', // Include credentials like cookies for authentication
+      });
+
+      if (response.ok) {
+        console.log('User successfully logged out');
+        navigate('/'); // Redirect to login page
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  const handleOrdersClick = () => {
+    navigate('/orders'); // Navigate to the orders route
   };
 
   return (
@@ -29,7 +47,7 @@ export function ProfileDropdown({ username }) {
       {isOpen && (
         <div className="dropdown-menu">
           <a href="#">Profile</a>
-          <a href="#">Orders</a>
+          <a onClick={handleOrdersClick}>Orders</a> {/* Handle Orders Click */}
           <button className="profile-button" onClick={handleLogout}>
             Logout
           </button>

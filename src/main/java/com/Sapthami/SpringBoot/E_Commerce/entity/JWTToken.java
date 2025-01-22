@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+
 @Entity
 @Table(name = "jwt_tokens")
 public class JWTToken {
@@ -77,11 +78,8 @@ public class JWTToken {
 	}
 
     // Getters and Setters
-	
-    public JWTToken() 
-    {
-		
-	}
-    
+    public JWTToken() {
+		// TODO Auto-generated constructor stub
+	}  
     
 }
